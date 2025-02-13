@@ -8,13 +8,13 @@ import { getStorage } from "firebase/storage";
 // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
-  apiKey: "AIzaSyDHsDjymTINN2bcnRtMVop5-qu9wf9CNVU",
-  authDomain: "smartroute-ca317.firebaseapp.com",
-  projectId: "smartroute-ca317",
-  storageBucket: "smartroute-ca317.appspot.com",
-  messagingSenderId: "14900432578",
-  appId: "1:14900432578:web:32d90f67eecab7bd20f55b",
-  measurementId: "G-9Q1LEQSQ2S",
+  apiKey: "AIzaSyA-aTZEfvEXUfTgzsv_KUzBJf8hKsZa1bM",
+  authDomain: "advance-medical-ac3b2.firebaseapp.com",
+  projectId: "advance-medical-ac3b2",
+  storageBucket: "advance-medical-ac3b2.firebasestorage.app",
+  messagingSenderId: "286219799190",
+  appId: "1:286219799190:web:90a53686144ef165bed0b7",
+  measurementId: "G-1WPRDDP4G3",
 };
 // Initialize Firebase
 // Check if Firebase app is already initialized, to prevent initializing multiple times

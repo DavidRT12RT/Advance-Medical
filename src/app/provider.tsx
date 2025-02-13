@@ -11,14 +11,15 @@ import { initializeApp } from 'firebase/app';
 import { Spin } from 'antd';
 import FireStoreAdministracion from '@/firebase/FireStoreAdministracion';
 
+
 const firebaseConfig = {
-  apiKey: "AIzaSyDHsDjymTINN2bcnRtMVop5-qu9wf9CNVU",
-  authDomain: "smartroute-ca317.firebaseapp.com",
-  projectId: "smartroute-ca317",
-  storageBucket: "smartroute-ca317.appspot.com",
-  messagingSenderId: "14900432578",
-  appId: "1:14900432578:web:32d90f67eecab7bd20f55b",
-  measurementId: "G-9Q1LEQSQ2S"
+  apiKey: "AIzaSyA-aTZEfvEXUfTgzsv_KUzBJf8hKsZa1bM",
+  authDomain: "advance-medical-ac3b2.firebaseapp.com",
+  projectId: "advance-medical-ac3b2",
+  storageBucket: "advance-medical-ac3b2.firebasestorage.app",
+  messagingSenderId: "286219799190",
+  appId: "1:286219799190:web:90a53686144ef165bed0b7",
+  measurementId: "G-1WPRDDP4G3",
 };
 
 // Initialize Firebase
