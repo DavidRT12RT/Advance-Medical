@@ -1,0 +1,145 @@
+{
+    "Lugar_de_Emision":"TIJUANA , BAJA CALIFORNIA",
+    "Fecha_de_Emision":"2023-11-03",
+    "RFC":"SCO2004173N1",
+    "Denominacion_Razon_Social":"SKIPEAT CORP",
+    "Regimen_Capital":"SOCIEDAD ANONIMA DE CAPITAL VARIABLE",
+    "Nombre_Comercial":"SKIPEAT CORPSADECV",
+    "Fecha_inicio_operaciones":"2020-04-17",
+    "Estatus_en_el_padron":"ACTIVO",
+    "Fecha_ultimo_cambio_estado":"2020-04-17",
+    "Domicilio_Registrado":{
+       "Codigo_Postal":"22626",
+       "Tipo_Vialidad":"CALLE",
+       "Nombre_Vialidad":"GRANATE",
+       "Numero_Exterior":"4722",
+       "Numero_Interior":"",
+       "Colonia":"EL RUBI",
+       "Localidad":"OTRA NO ESPECIFICADA EN EL CATALOGO",
+       "Municipio_Demarcacion":"TIJUANA",
+       "Entidad_Federativa":"BAJA CALIFORNIA",
+       "Entre_Calle":"BLVD FUNDADORES",
+       "Y_Calle":"ENSENADA"
+    },
+    "Actividades_Economicas":[
+       {
+          "Actividad":"Procesamiento electrónico de información, hospedaje de páginas web y otros servicios relacionados",
+          "Porcentaje":100,
+          "Fecha_Inicio":"2020-04-17"
+       }
+    ],
+    "Regimenes":[
+       {
+          "Regimen":"Régimen General de Ley Personas Morales",
+          "Fecha_Inicio":"2020-04-17"
+       }
+    ],
+    "Obligaciones":[
+       {
+          "Descripcion":"Pago definitivo mensual de IVA",
+          "Vencimiento":"17 del mes inmediato posterior al periodo que corresponda",
+          "Fecha_Inicio":"2020-04-17"
+       },
+       {
+          "Descripcion":"Declaración de proveedores de IVA",
+          "Vencimiento":"Último día del mes inmediato posterior al periodo que corresponda",
+          "Fecha_Inicio":"2020-04-17"
+       },
+       {
+          "Descripcion":"Declaración anual de ISR del ejercicio Personas morales",
+          "Vencimiento":"Dentro de los tres meses siguientes al cierre del ejercicio",
+          "Fecha_Inicio":"2020-04-17"
+       },
+       {
+          "Descripcion":"Pago provisional mensual de ISR personas morales régimen general",
+          "Vencimiento":"17 del mes inmediato posterior al periodo que corresponda",
+          "Fecha_Inicio":"2021-04-01"
+       }
+    ],
+    
+      "CATEGORIA": [
+          {
+              "label": "Categoria 1",
+              "value": "Categoria 1"
+          },
+          {
+              "label": "Categoria 2",
+              "value": "Categoria 2"
+          },
+          {
+              "label": "Categoria 3",
+              "value": "Categoria 3"
+          }
+      ],
+      "MARCA": [
+          {
+              "label": "Marca 1",
+              "value": "Marca 1"
+          },
+          {
+              "label": "Marca 2",
+              "value": "Marca 2"
+          },
+          {
+              "label": "Marca 3",
+              "value": "Marca 3"
+          }
+      ],
+      "PRESENTACION": [
+          {
+              "label": "Presentacion 1",
+              "value": "Presentacion 1"
+          },
+          {
+              "label": "Presentacion 2",
+              "value": "Presentacion 2"
+          },
+          {
+              "label": "Presentacion 3",
+              "value": "Presentacion 3"
+          }
+      ],
+      "FAMILIA": [
+          {
+              "label": "Familia 1",
+              "value": "Familia 1"
+          },
+          {
+              "label": "Familia 2",
+              "value": "Familia 2"
+          },
+          {
+              "label": "Familia 3",
+              "value": "Familia 3"
+          }
+      ],
+      "TIPO_UNIDAD": [
+          {
+              "label": "Tipo Unidad 1",
+              "value": "Tipo Unidad 1"
+          },
+          {
+              "label": "Tipo Unidad 2",
+              "value": "Tipo Unidad 2"
+          },
+          {
+              "label": "Tipo Unidad 3",
+              "value": "Tipo Unidad 3"
+          }
+      ],
+      "CATALOGO": [
+          {
+              "label": "Catalogo 1",
+              "value": "Catalogo 1"
+          },
+          {
+              "label": "Catalogo 2",
+              "value": "Catalogo 2"
+          },
+          {
+              "label": "Catalogo 3",
+              "value": "Catalogo 3"
+          }
+      ]
+ }
+ 

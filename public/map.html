@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Google Maps - Autocompletado y Marcador</title>
+  <style>
+    #map {
+      height: 500px;
+      width: 100%;
+    }
+    #pac-input {
+      margin-top: 10px;
+      width: 400px;
+      padding: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <h3>Selecciona una ubicación en México</h3>
+  
+  <!-- Campo de autocompletado -->
+  <input id="pac-input" type="text" placeholder="Ingresa la dirección">
+
+  <!-- Mapa -->
+  <div id="map"></div>
+
+  <!-- Mostrar coordenadas seleccionadas -->
+  <p>Coordenadas: <span id="coordinates"></span></p>
+  <p>Dirección: <span id="address"></span></p>
+
+  <!-- Scripts -->
+  <script>
+    let map;
+    let marker;
+    let geocoder;
+    let infowindow;
+
+    function initMap() {
+      // Inicializa el mapa centrado en México
+      const mexico = { lat: 23.6345, lng: -102.5528 };
+      map = new google.maps.Map(document.getElementById("map"), {
+        center: mexico,
+        zoom: 5,
+      });
+
+      // Inicializa el geocoder y el infowindow
+      geocoder = new google.maps.Geocoder();
+      infowindow = new google.maps.InfoWindow();
+
+      // Crear un marcador que será movible
+      marker = new google.maps.Marker({
+        map: map,
+        draggable: true, // Permitir que el pin sea arrastrado
+      });
+
+      // Autocomplete en el campo de entrada
+      const input = document.getElementById("pac-input");
+      const autocomplete = new google.maps.places.Autocomplete(input, {
+        componentRestrictions: { country: "mx" }, // Restringir a México
+        fields: ["address_components", "geometry"],
+      });
+
+      // Al seleccionar una ubicación del autocompletado
+      autocomplete.addListener("place_changed", () => {
+        const place = autocomplete.getPlace();
+
+        if (!place.geometry || !place.geometry.location) {
+          alert("No se encontró la ubicación.");
+          return;
+        }
+
+        // Mover el mapa a la ubicación seleccionada
+        map.setCenter(place.geometry.location);
+        map.setZoom(15);
+
+        // Mover el marcador a la ubicación seleccionada
+        marker.setPosition(place.geometry.location);
+        marker.setVisible(true);
+
+        // Guardar las coordenadas y la dirección
+        const lat = place.geometry.location.lat();
+        const lng = place.geometry.location.lng();
+        const address = place.formatted_address;
+
+        document.getElementById("coordinates").textContent = `Lat: ${lat}, Lng: ${lng}`;
+        document.getElementById("address").textContent = address;
+      });
+
+      // Cuando se mueve el marcador, actualizar las coordenadas y obtener la dirección
+      google.maps.event.addListener(marker, "dragend", function () {
+        const position = marker.getPosition();
+        updateCoordinatesAndAddress(position);
+      });
+
+      // Cuando se hace clic en el mapa, mover el marcador a la nueva posición
+      google.maps.event.addListener(map, "click", function (event) {
+        marker.setPosition(event.latLng);
+        updateCoordinatesAndAddress(event.latLng);
+      });
+    }
+
+    // Función para actualizar las coordenadas y obtener la dirección
+    function updateCoordinatesAndAddress(latlng) {
+      const lat = latlng.lat();
+      const lng = latlng.lng();
+      document.getElementById("coordinates").textContent = `Lat: ${lat}, Lng: ${lng}`;
+
+      // Geocodificar las coordenadas para obtener la dirección
+      geocoder.geocode({ location: latlng }, (results, status) => {
+        if (status === "OK" && results[0]) {
+          document.getElementById("address").textContent = results[0].formatted_address;
+        } else {
+          document.getElementById("address").textContent = "No se pudo obtener la dirección.";
+        }
+      });
+    }
+  </script>
+
+  <!-- Cargar la API de Google Maps con Autocomplete y Geocoder -->
+  <script async
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC8jGa8BQwCl8Kwc1686dHWgyjd6LYxUfk&libraries=places&callback=initMap">
+  </script>
+
+</body>
+</html>

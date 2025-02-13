@@ -1,0 +1,9 @@
+{
+  "projects": {
+    "default": "smartroute-ca317",
+    "smartroute": "smartroute-ca317"
+  },
+  "targets": {},
+  "etags": {},
+  "dataconnectEmulatorConfig": {}
+}

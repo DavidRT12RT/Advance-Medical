@@ -1,0 +1,134 @@
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+html,
+body {
+  max-width: 100vw;
+  overflow-x: hidden;
+}
+
+body {
+  color: var(--foreground);
+  background: var(--background);
+  font-family: Arial, Helvetica, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+* {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+@media (prefers-color-scheme: dark) {
+  html {
+    color-scheme: dark;
+  }
+}
+
+.ant-menu-sub {
+  background: #007BFF !important;
+}
+
+.ant-menu-submenu-title {
+  color: white !important;
+}
+
+.ant-menu-item:hover:not(.ant-menu-item-selected) {
+  background: rgba(255, 255, 255, 0.1) !important;
+}
+
+.ant-menu-submenu-title:hover {
+  background: rgba(255, 255, 255, 0.1) !important;
+}
+
+.ant-menu-sub .ant-menu-item:hover:not(.ant-menu-item-selected) {
+  background: rgba(255, 255, 255, 0.1) !important;
+}
+
+.ant-card-body {
+  padding: 1rem !important;
+}
+
+.ant-drawer-body {
+  padding-top: 0px !important;
+}
+
+.ant-upload {
+  width: 100% !important;
+}
+
+.ant-collapse-header {
+  background-color: #f2f2f2 !important;
+  border-radius: 0.5rem !important;
+}
+
+div:where(.swal2-container) {
+  z-index: 999999 !important;
+}
+
+/* ESTILOS PARA PROGRESS NATIVE */
+.progress-custom {
+  margin: 0px;
+  padding: 0px;
+  height: 4px;
+  position: relative;
+}
+
+.progress-custom progress {
+  width: 100%;
+  height: 4px;
+  -webkit-appearance: none;
+  appearance: none;
+  border: none;
+  border-radius: 0px;
+  overflow: hidden;
+  background-color: #e0e0e0;
+}
+
+/* Estilo para navegadores WebKit */
+.progress-custom progress::-webkit-progress-bar {
+  background-color: #e0e0e0;
+}
+
+.progress-custom progress::-webkit-progress-value {
+  background-color: #007BFF;
+  transition: width 0.4s ease-in-out;
+}
+
+/* Estilo para navegadores basados en Firefox */
+.progress-custom progress::-moz-progress-bar {
+  background-color: #007BFF;
+  transition: width 0.4s ease-in-out;
+}
+
+/* Aumenta la especificidad apuntando a elementos más específicos de la tabla */
+.ant-table .ant-table-tbody>tr:hover>td {
+  background-color: rgba(0, 123, 255, 0.2) !important;
+  /* Cambia el color según tu preferencia */
+}
+
+/* Asegurar que el autocompletado de Google Maps se muestre sobre otros componentes */
+.pac-container {
+  z-index: 999999 !important;
+}
+
+/* filas de la tabla de colaboradores activos */
+.row-active {
+  background-color: rgba(0, 123, 255, 0.2) !important;
+}

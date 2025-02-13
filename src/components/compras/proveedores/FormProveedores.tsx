@@ -1,0 +1,571 @@
+"use client";
+import React from 'react';
+import Swal from 'sweetalert2';
+import { v4 as uuidv4 } from 'uuid';
+import { Avatar, Badge, Button, Col, Collapse, Descriptions, Divider, Flex, Form, Grid, Input, List, Row, Select, Tooltip, Typography, Upload } from 'antd';
+import {
+  UndoOutlined,
+  SaveOutlined,
+  FilePdfOutlined,
+  PlusOutlined,
+  MinusCircleOutlined,
+  EyeOutlined,
+  CloudDownloadOutlined,
+  EnvironmentOutlined
+} from '@ant-design/icons';
+import { useDispatch, useSelector } from 'react-redux';
+import GoogleAddress from '@/components/GoogleAddress';
+import FireStoreVentas from '@/firebase/FireStoreVentas';
+import { setLoading, setOpenDrawer, setPerfilProveedores, setRefresh, setOpenDrawerProveedor, setProveedorRefresh, setNewProveedorId } from '@/features/ventasSlice';
+import { getDownloadURL, getStorage, ref, uploadBytes } from 'firebase/storage';
+import { setAddressMultiple, setDirecciones } from '@/features/configuracionSlice';
+import { setNewProveedorId as setNewProveedorIdCompras,setOpenDrawer as setOpenDrawerCompras } from '@/features/comprasSlice';
+import { setIdNuevoProveedor } from '@/features/finanzasSlice';
+
+const style: React.CSSProperties = { width: '100%' };
+const { useBreakpoint } = Grid;
+
+const uploadFilesEmpresaFB = async (file: any, proveedorId: string) => {
+  const storage = getStorage();
+  const storageRef = ref(storage, `proveedoresFiles/${proveedorId}/${file?.name}`);
+  try {
+    // Subir imagen
+    const { metadata } = await uploadBytes(storageRef, file, {
+      contentType: file?.type,
+    });
+    const { bucket, contentType, name, fullPath } = metadata;
+    // Obtener URL de descarga
+    const imageUrl = await getDownloadURL(storageRef);
+    return { url: imageUrl, bucket, contentType, name, fullPath };
+  } catch (error) {
+    throw error;
+  }
+};
+const DOCUMENTOS: any = {
+  "contratos": "Contratos",
+  "cfdi": "Cédula de identificación fiscal",
+  "otros": "Otros"
+};
+
+const MONEDAS = [
+  { label: "USD", value: "USD" },
+  { label: "Euros", value: "EUR" },
+  { label: "Pesos Mexicanos", value: "MXN" },
+  { label: "Pesos Colombianos", value: "COP" },
+  { label: "Pesos Ecuatorianos", value: "ECS" },
+];
+
+
+const FormProveedor = ({ form }: any) => {
+
+  const screens = useBreakpoint();
+  const dispatch = useDispatch();
+  const { loading, perfilProveedor } = useSelector((state: any) => state.ventas);
+
+  const idAddress = uuidv4();
+  const { direcciones, addressMultiple, auth } = useSelector((state: any) => state.configuracion);
+
+
+  React.useEffect(() => {
+    dispatch(setDirecciones([{ id: idAddress, element: <GoogleAddress id={idAddress} /> }]));
+  }, []);
+
+
+  const [test, settest] = React.useState<any>({
+    contratos: [],
+    cfdi: [],
+    otros: []
+  });
+
+
+  // Documentos por cargar
+  let DOCUMENTOS_SOLICITADOS: any = [
+    { "contratos": "Contratos" },
+    { "cfdi": "Cédula de identificación fiscal" },
+    { "otros": "Otros" }
+  ]
+    .map((doc: any, index: number) => {
+      const [[key, value]] = Object.entries(doc);
+      return [
+        {
+          key: `Documento-${String((index + 1))}`,
+          label: "Documento",
+          children: value,
+        },
+        {
+          key: `Estado-${String((index + 1))}`,
+          label: "Estado",
+          children: <Badge status="warning" text="Pendiente" />,
+        },
+        {
+          kkey: `Archivo-${String((index + 1))}`,
+          label: "Archivo",
+          children: (
+
+            <Upload
+              /* multiple */
+              accept="application/pdf"
+              listType="picture"
+              fileList={(test?.[key] || []).map((f: any) => ({
+                ...f,
+                name: `${f?.name?.length > 30 ? f?.name.slice(0, 30) + "..." : f?.name}`
+              }))}
+              maxCount={8}
+              onChange={({ fileList: newFileList }: any) => {
+                settest((oldData: any) => ({ ...oldData, [key]: newFileList.slice(-1) }));
+              }}
+              beforeUpload={() => false}
+            >
+              <Button block type="dashed" icon={<FilePdfOutlined />}>Cargar archivo</Button>
+            </Upload>
+
+          ),
+        }
+      ]
+    });
+
+  DOCUMENTOS_SOLICITADOS = DOCUMENTOS_SOLICITADOS.flat();
+
+  // Documentos cargados
+  let DOCUMENTOS_SOLICITADOS_CARGADOS = (perfilProveedor?.documentos || [])
+    .map((doc: any, index: number) => {
+      return [
+        {
+          key: String((index + 1)),
+          label: "Documento",
+          children: DOCUMENTOS[doc?.documento] || "---",
+        },
+        {
+          key: String((index + 1)),
+          label: "Estado",
+          children: <Badge
+            status={
+              doc?.estatus == "Aceptado"
+                ? "success"
+                : doc?.estatus == "Rechazado" ? "error" : "processing"
+            }
+            text={doc?.estatus || "---"} />,
+        },
+        {
+          key: String((index + 1)),
+          label: "Archivo",
+          children: (
+            <Button.Group>
+              <Button
+                onClick={() => {
+                  const a = document.createElement('a');
+                  a.href = doc?.url;
+                  a.target = "_blank";
+                  a.download = doc?.name;
+                  document.body.appendChild(a);
+                  a.click();
+                  document.body.removeChild(a);
+                }}
+                block
+                type="dashed"
+                icon={<EyeOutlined />}>Visualizar archivo</Button>
+              <Button
+                onClick={async () => {
+                  const a = document.createElement('a');
+                  a.href = doc?.url;
+                  a.target = "_blank";
+                  a.download = doc?.name;
+                  document.body.appendChild(a);
+                  a.click();
+                  document.body.removeChild(a);
+                }}
+                block
+                type="dashed"
+                icon={<CloudDownloadOutlined />}>Descargar archivo</Button>
+            </Button.Group>
+          ),
+        },
+
+      ]
+    });
+
+  DOCUMENTOS_SOLICITADOS_CARGADOS = DOCUMENTOS_SOLICITADOS_CARGADOS.flat();
+
+
+
+  return (
+    <Form
+      form={form}
+      name="login-form"
+      layout="vertical"
+      style={{ width: "100%" }}
+      initialValues={{
+        id: "",
+        // Informacion GENERAL
+        nombreProveedor: "",
+        tipoIndustria: "",
+        direccion: "",
+        coordinates: { lat: null, lng: null },
+        tipoDireccion: "",
+        emailCompras: "",
+        emailFacturacion: "",
+        monedaUtilizada: "",
+        // Informacion de Contacto
+        nombreContacto: "",
+        telefonoContacto: "",
+        correoContacto: "",
+        documentos: [],
+        // Informacion pagos (Opcional)
+        nombreBanco: "",
+        numeroCuenta: "",
+        nombreBeneficiario: "",
+        monedaPago: "",
+        fechaRegistroDoc: "",
+        // Informacion por verificar con Hamer
+        regimenFiscal: "",
+        tipoProducto: "",
+      }}
+      onFinish={async (values) => {
+        try {
+          if (!perfilProveedor?.id && !addressMultiple?.length) {
+            Swal.fire({
+              title: "Ingrese una dirección",
+              text: "",
+              icon: "warning"
+            });
+            return;
+          }
+
+          dispatch(setLoading(true));
+
+          const idPostulante = uuidv4();
+          // CARGAMOS LOS ARCHIVOS A STORAGE
+          const allFiles = [];
+          for (const key in test) {
+            const [firstFile] = test[key];
+            if (firstFile) {
+              allFiles.push(uploadFilesEmpresaFB(firstFile?.originFileObj, idPostulante))
+            }
+          }
+
+          const responseFilesUpload = await Promise.all(allFiles);
+          const filesUploaded: any[] = [];
+          responseFilesUpload.forEach(({ url, contentType, fullPath, name }: any, index: number) => {
+            filesUploaded.push({
+              documento: Object.keys(test)[index],
+              estatus: "En revisión",
+              url,
+              name,
+              fullPath,
+              contentType,
+            });
+          });
+          let newProveedorId: any = null;
+
+          if (perfilProveedor?.id) {// UPDATE
+            // Registrar el proveedor en Firestore
+            await FireStoreVentas.registrarProveedor(auth?.empresa?.id, {
+              ...values,
+              direcciones: [...(perfilProveedor?.direcciones || []), ...addressMultiple],
+              documentos: [...(perfilProveedor?.documentos || []), ...filesUploaded],
+            });
+          } else { // REGISTER
+            const [fechaRegistro] = new Date().toISOString().split('T');
+            // Registrar el proveedor en Firestore
+            newProveedorId = await FireStoreVentas.registrarProveedor(auth?.empresa?.id, {
+              ...values,
+              fechaRegistroDoc: fechaRegistro,
+              direcciones: addressMultiple,
+              documentos: filesUploaded,
+            });
+
+            dispatch(setIdNuevoProveedor(newProveedorId));
+          }
+
+          settest({
+            contratos: [],
+            cfdi: [],
+            otros: []
+          });
+
+          dispatch(setLoading(false));
+          form.resetFields();
+          dispatch(setOpenDrawer(false));
+          dispatch(setOpenDrawerProveedor(false))
+          dispatch(setNewProveedorId(newProveedorId))
+          dispatch(setNewProveedorIdCompras(newProveedorId)); // -> Setear el nuevo proveedor en compras  
+          dispatch(setProveedorRefresh(false))
+          const idAddress = uuidv4();
+          dispatch(setDirecciones([{ id: idAddress, element: <GoogleAddress id={idAddress} /> }]));
+          dispatch(setAddressMultiple([]));
+          dispatch(setRefresh(Math.random()));
+          dispatch(setOpenDrawerCompras(false));
+
+          Swal.fire({
+            position: "top-end",
+            icon: "success",
+            title: `Proveedor ${perfilProveedor?.id ? 'actualizado' : 'registrado'} con éxito!`,
+            showConfirmButton: false,
+            timer: 3000,
+          });
+        } catch (error: any) {
+          console.log('error', error);
+          Swal.fire({
+            title: "ERROR",
+            text: error?.toString(),
+            icon: "error",
+          });
+        }
+      }}
+    >
+      <Row gutter={12}>
+        <Divider orientation="left">Información del proveedor</Divider>
+        <Form.Item
+          style={{ display: "none" }}
+          name="id"
+          label="Id"
+          rules={[{ required: false, message: 'Ingrese Id' }]}
+        >
+          <Input placeholder="Ingrese Id" style={style} />
+        </Form.Item>
+
+        <Col xs={24} sm={12} lg={8}>
+          <Form.Item name="nombreProveedor" label="Nombre del proveedor" rules={[{ required: true, message: 'Ingrese el nombre del proveedor' }]}>
+            <Input placeholder="Ingrese el nombre del proveedor" style={style} />
+          </Form.Item>
+        </Col>
+
+        <Col xs={24} sm={12} lg={8}>
+          <Form.Item name="tipoIndustria" label="Tipo de industria" rules={[{ required: true, message: 'Ingrese el tipo de industria' }]}>
+            <Input placeholder="Ingrese el tipo de industria" style={style} />
+          </Form.Item>
+        </Col>
+        <Col xs={24} sm={12} lg={8}>
+          <Form.Item name="tipoProducto" label="Tipo producto" rules={[{ required: true, message: 'Ingrese el tipo de industria' }]}>
+            <Input placeholder="Ingrese el tipo de industria" style={style} />
+          </Form.Item>
+        </Col>
+
+        <Col xs={24} sm={24} lg={24}>
+          {Boolean(perfilProveedor?.id) && (
+            <>
+              <Collapse
+                size="small"
+                defaultActiveKey={[]}
+                items={[
+                  {
+                    key: '1',
+                    label: (
+                      <Badge offset={[15, 12]} count={(perfilProveedor?.direcciones || [])?.length}>
+                        <Typography.Text strong>
+                          {`Direcciones registradas`}
+                        </Typography.Text>
+                      </Badge>
+                    ),
+                    children: (
+                      <>
+                        <List
+                          size="small"
+                          header={null}
+                          footer={null}
+                          dataSource={(perfilProveedor?.direcciones || [])}
+                          renderItem={(item: any, index) => (
+                            <List.Item
+                              actions={[
+                                <Tooltip title="Eliminar">
+                                  <Button type="dashed" shape="circle" danger icon={<MinusCircleOutlined />} onClick={() => {
+                                    const direccion = (perfilProveedor?.direcciones || [])[index];
+                                    Swal.fire({
+                                      title: "Seguro de eliminar dirección?",
+                                      text: direccion?.place,
+                                      icon: "question",
+                                      showCancelButton: true,
+                                      confirmButtonColor: "#1677ff",
+                                      cancelButtonColor: "#d33",
+                                      confirmButtonText: "Si",
+                                      cancelButtonText: "No"
+                                    }).then(async (result) => {
+                                      if (result.isConfirmed) {
+                                        const filterDirecciones = (perfilProveedor?.direcciones || []).filter((d: any) => {
+                                          return d?.id != direccion?.id
+                                        });
+                                        // Registrar el proveedor en Firestore
+                                        await FireStoreVentas.registrarProveedor(auth?.empresa?.id, {
+                                          ...perfilProveedor,
+                                          direcciones: filterDirecciones
+                                        });
+
+                                        // simulamos la eliminacion local
+                                        dispatch(setPerfilProveedores({
+                                          ...perfilProveedor,
+                                          direcciones: filterDirecciones
+                                        }));
+
+                                        dispatch(setRefresh(Math.random()));
+                                        Swal.fire({
+                                          title: "Eliminado!",
+                                          text: "",
+                                          icon: "success"
+                                        });
+                                      }
+                                    });
+                                  }} />
+                                </Tooltip>
+                              ]}
+                            >
+                              <List.Item.Meta
+                                avatar={(
+                                  <Avatar>
+                                    <EnvironmentOutlined style={{ fontSize: "16px" }} />
+                                  </Avatar>
+                                )}
+                                title={(
+                                  <Typography.Link
+                                    href="#"
+                                    onClick={(e) => e.preventDefault()}
+                                    style={{ color: "#1a79ff", textDecoration: "none" }}
+                                    underline={false}>
+                                    {item?.place}
+                                  </Typography.Link>
+                                )}
+                                description={(
+                                  <Typography.Text strong onClick={(e) => e.preventDefault()}>
+                                    {item?.tipoDireccion || "---"}
+                                  </Typography.Text>
+                                )}
+                              />
+                            </List.Item>
+                          )}
+                        />
+                      </>
+                    )
+                  },
+                ]}
+              />
+              <Divider />
+            </>
+          )}
+
+          <Badge offset={[15, 12]} count={addressMultiple?.length}>
+            <Typography.Text strong>Nuevas direcciones</Typography.Text>
+          </Badge>
+
+          <div style={{ ...style, maxHeight: "200px", overflow: "auto", padding: "0.5rem 0rem" }}>
+            {direcciones.map((elementDireccion: any) => (elementDireccion.element))}
+          </div>
+          <div style={{ width: "100%", textAlign: "center", margin: "auto" }}>
+            <Button type="dashed" icon={<PlusOutlined />} onClick={() => {
+              const idAddress = uuidv4();
+              dispatch(setDirecciones([...direcciones, { id: idAddress, element: <GoogleAddress id={idAddress} /> }]));
+            }}>Agregar dirección</Button>
+          </div>
+          <Divider />
+        </Col>
+
+        <Col xs={24} sm={12} lg={12}>
+          <Form.Item name="emailCompras" label="Email de compras" rules={[{ required: false, message: 'Ingrese el email de compras' }, { type: 'email', message: 'Ingrese un correo electrónico válido' }]}>
+            <Input placeholder="Ingrese el email de compras" style={style} />
+          </Form.Item>
+        </Col>
+
+        <Col xs={24} sm={12} lg={12}>
+          <Form.Item name="emailFacturacion" label="Email de facturación" rules={[{ required: false, message: 'Ingrese el email de facturación' }, { type: 'email', message: 'Ingrese un correo electrónico válido' }]}>
+            <Input placeholder="Ingrese el email de facturación" style={style} />
+          </Form.Item>
+        </Col>
+      </Row>
+
+      <Row gutter={12}>
+        <Divider orientation="left">Información de contacto</Divider>
+
+        <Col xs={24} sm={12} lg={8}>
+          <Form.Item name="nombreContacto" label="Nombre" rules={[{ required: true, message: 'Ingrese el nombre del contacto' }]}>
+            <Input placeholder="Ingrese el nombre del contacto" style={style} />
+          </Form.Item>
+        </Col>
+
+        <Col xs={24} sm={12} lg={8}>
+          <Form.Item name="telefonoContacto" label="Número de teléfono" rules={[{ required: true, message: 'Ingrese el número de teléfono' }]}>
+            <Input placeholder="Ingrese el número de teléfono" style={style} />
+          </Form.Item>
+        </Col>
+
+        <Col xs={24} sm={12} lg={8}>
+          <Form.Item name="correoContacto" label="Correo" rules={[{ required: true, message: 'Ingrese el correo' }, { type: 'email', message: 'Ingrese un correo electrónico válido' }]}>
+            <Input placeholder="Ingrese el correo" style={style} />
+          </Form.Item>
+        </Col>
+
+        <Col xs={24} sm={24} lg={24}>
+          {Boolean(perfilProveedor?.id) && (
+            <>
+              <Collapse
+                size="small"
+                defaultActiveKey={[]}
+                items={[
+                  {
+                    key: '1',
+                    label: (
+                      <Badge offset={[15, 12]} count={(perfilProveedor?.documentos || [])?.length}>
+                        <Typography.Text strong>
+                          {`Documentos registrados`}
+                        </Typography.Text>
+                      </Badge>
+                    ),
+                    children: (
+                      <div style={{ minWidth: screens.md ? "300px" : "600px", overflow: "auto" }}>
+                        <Descriptions size='small' column={1} bordered items={DOCUMENTOS_SOLICITADOS_CARGADOS} />
+                      </div>
+                    )
+                  },
+                ]}
+              />
+              <Divider />
+            </>
+          )}
+          <div style={{ minWidth: screens.md ? "300px" : "600px", overflow: "auto" }}>
+            <Descriptions size='small' column={1} bordered items={DOCUMENTOS_SOLICITADOS} />
+          </div>
+        </Col>
+      </Row>
+
+      <Row gutter={12}>
+        <Divider orientation="left">Información de pagos (Opcional)</Divider>
+
+        <Col xs={24} sm={12} lg={12}>
+          <Form.Item name="nombreBanco" label="Nombre del banco">
+            <Input placeholder="Ingrese el nombre del banco" style={style} />
+          </Form.Item>
+        </Col>
+
+        <Col xs={24} sm={12} lg={12}>
+          <Form.Item name="numeroCuenta" label="Número de cuenta">
+            <Input placeholder="Ingrese el número de cuenta" style={style} />
+          </Form.Item>
+        </Col>
+
+        <Col xs={24} sm={12} lg={12}>
+          <Form.Item name="nombreBeneficiario" label="Nombre del beneficiario">
+            <Input placeholder="Ingrese el nombre del beneficiario" style={style} />
+          </Form.Item>
+        </Col>
+        <Col xs={24} sm={12} lg={12}>
+          <Form.Item name="monedaUtilizada" label="Moneda utilizada" rules={[{ required: true, message: 'Seleccione la moneda utilizada' }]}>
+            <Select options={MONEDAS} placeholder="Seleccione la moneda utilizada" style={style} />
+          </Form.Item>
+        </Col>
+      </Row>
+
+      <Row gutter={12}>
+        <Divider></Divider>
+        <Col span={24}>
+          <Flex gap="small" style={{ width: '50%', margin: "auto" }}>
+            <Button loading={loading} icon={<UndoOutlined />} danger type="primary" block htmlType="reset">
+              Limpiar
+            </Button>
+            <Button loading={loading} icon={<SaveOutlined />} type="primary" block htmlType="submit">
+              Guardar
+            </Button>
+          </Flex>
+        </Col>
+      </Row>
+    </Form>
+  );
+};
+
+export default FormProveedor;
